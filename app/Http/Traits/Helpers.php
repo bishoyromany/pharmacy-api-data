@@ -14,9 +14,15 @@ trait Helpers
         $orderBy = $request->orderBy ?? false;
         $operator = $request->operator ?? "=";
         $query = $this->table;
-        if($where){
-            $query = $query->where($where, $operator, $request->value);
+
+        if($operator === "in" && $where){
+            $query = $query->whereIn($where, explode(",",$request->value));
+        }else{
+            if($where){
+                $query = $query->where($where, $operator, $request->value);
+            } 
         }
+
 
         if($orderBy){
             $query = $query->orderBy($orderBy, $order);
