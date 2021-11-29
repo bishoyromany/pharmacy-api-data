@@ -12,9 +12,10 @@ trait Helpers
         $where = $request->where ?? false;
         $order = $request->order ?? "ASC";
         $orderBy = $request->orderBy ?? false;
+        $operator = $request->operator ?? "=";
         $query = $this->table;
         if($where){
-            $query = $query->where($where, $request->value);
+            $query = $query->where($where, $operator, $request->value);
         }
 
         if($orderBy){
