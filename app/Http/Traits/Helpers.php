@@ -40,7 +40,6 @@ trait Helpers
             ],
             'data' => $query->get()
         ];
-        dd($request->all());
     }
 
     public function api($data, Int $status = 200){

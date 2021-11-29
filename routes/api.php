@@ -24,7 +24,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 
 Route::middleware(["App\Http\Middleware\DevelopmentMiddleware"])->prefix("v1.0")->group(function(){
-    Route::get("patients", [PatientController::class, "index"]);
-    Route::get("dynamic/{table}", [DynamicTableController::class, "index"]);
-    Route::get("dynamic/poss/{table}", [DynamicPOSSTableController::class, "index"]);
+    Route::any("patients", [PatientController::class, "index"]);
+    Route::any("dynamic/{table}", [DynamicTableController::class, "index"]);
+    Route::any("dynamic/poss/{table}", [DynamicPOSSTableController::class, "index"]);
 });
