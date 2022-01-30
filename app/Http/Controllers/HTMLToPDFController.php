@@ -5,32 +5,27 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Spiritix\Html2Pdf\Converter;
 use Spiritix\Html2Pdf\Input\StringInput;
-use Spiritix\Html2Pdf\Input\UrlInput;
 use Spiritix\Html2Pdf\Output\DownloadOutput;
 
 class HTMLToPDFController extends Controller
 {
     public function convert(Request $request)
     {
-        // $input = new StringInput();
-        // $input->setHtml($request->html);
-
-        $input = new UrlInput();
-        $input->setUrl("https://www.youtube.com/watch?v=_CtWwFweeFk");
+        $name = $request->name ?? "download";
+        $name .= ".pdf";
+        $input = new StringInput();
+        $input->setHtml($request->html);
 
         $converter = new Converter($input, new DownloadOutput());
-
-        $converter->setOption('landscape', true);
 
         $converter->setOptions([
             'printBackground' => true,
             'displayHeaderFooter' => false,
-            'pageRanges' => 1,
-            'format' => 'A1',
+            'pageRanges' => "1-1",
+            'format' => 'Tabloid',
         ]);
 
         $output = $converter->convert();
-        dd($output);
-        // $output->download('google.pdf');
+        $output->download('google.pdf');
     }
 }

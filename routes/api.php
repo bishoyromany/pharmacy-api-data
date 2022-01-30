@@ -28,6 +28,8 @@ Route::middleware(["App\Http\Middleware\DevelopmentMiddleware"])->prefix("v1.0")
     Route::any("patients", [PatientController::class, "index"]);
     Route::any("dynamic/{table}", [DynamicTableController::class, "index"]);
     Route::any("dynamic/poss/{table}", [DynamicPOSSTableController::class, "index"]);
+});
 
+Route::middleware(["App\Http\Middleware\PDF2HTMLMiddleware"])->prefix("v1.0")->group(function () {
     Route::any("html/to/pdf", [HTMLToPDFController::class, "convert"]);
 });
