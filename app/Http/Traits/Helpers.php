@@ -23,7 +23,6 @@ trait Helpers
             } 
         }
 
-
         if($orderBy){
             $query = $query->orderBy($orderBy, $order);
         }
