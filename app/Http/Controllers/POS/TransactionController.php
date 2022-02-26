@@ -24,8 +24,16 @@ class TransactionController extends Controller
     public function index(Request $request){
         $table = $this->tables['trasnactions'];
         $this->table->setTable($table);
-        $this->table = $this->table->join($this->tables['paymentDetails'], $this->tables['trasnactions'].'.TransID', '=', $this->tables['paymentDetails'].'.TransID');
-        $this->table = $this->table->join($this->tables['paymentTypes'], $this->tables['paymentDetails'].'.TransTypeCode', '=', $this->tables['paymentTypes'].'.PayTypeID');
-        return $this->api($this->pagination($request));
+        $data = $this->pagination($request);
+        $data['data']->map(function($item){
+            $paymentDetails = app(DynamicPOSSTable::class)->setTable($this->tables['paymentDetails'])->where('TransID', $item->TransID)->first();
+            // $item->paymentDetails = $paymentDetails;
+            $paymentTypes = app(DynamicPOSSTable::class)->setTable($this->tables['paymentTypes'])->where('PayTypeID', $paymentDetails->TransTypeCode)->first();
+            $item->paymentTypes = $paymentTypes;
+            return $item;
+        });
+        // $this->table = $this->table->join($this->tables['paymentDetails'], $this->tables['trasnactions'].'.TransID', '=', $this->tables['paymentDetails'].'.TransID');
+        // $this->table = $this->table->join($this->tables['paymentTypes'], $this->tables['paymentDetails'].'.TransTypeCode', '=', $this->tables['paymentTypes'].'.PayTypeID');
+        return $this->api($data);
     }
 }
