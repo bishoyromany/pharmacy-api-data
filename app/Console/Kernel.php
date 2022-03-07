@@ -4,6 +4,7 @@ namespace App\Console;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use App\Jobs\PharmacySync;
 
 class Kernel extends ConsoleKernel
 {
@@ -13,7 +14,7 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        //
+        Commands\PharmacySync::class,
     ];
 
     /**
@@ -23,7 +24,16 @@ class Kernel extends ConsoleKernel
      * @return void
      */
     protected function schedule(Schedule $schedule)
-    {
+    {   
+        $schedule->job(new PharmacySync)->everyTenMinutes()->runInBackground()->withoutOverlapping(60);
+        $schedule->call(function () {
+            if (!file_exists(base_path() . "/cron.log")) {
+                file_put_contents(base_path() . "/cron.log", "");
+            }
+            $fp = fopen(base_path() . "/cron.log", 'a'); //opens file in append mode  
+            fwrite($fp, 'Cron Alive ' . date('Y-m-d H:i:s A') . " \n");
+            fclose($fp);
+        })->everyMinute();
         // $schedule->command('inspire')->hourly();
     }
 
