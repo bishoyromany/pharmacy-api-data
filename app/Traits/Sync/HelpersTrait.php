@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Sync\Traits;
-
-trait Helpers
+namespace App\Traits\Sync;
+use Illuminate\Support\Facades\Cache;
+trait HelpersTrait
 {
-    public static function sendData(string $table, array $data){
+    public static function sendData(string $table, array $data, string $cacheColumn){
         $client = new \GuzzleHttp\Client();
-        return $client->post(
+        $response = $client->post(
             env("API_URL"),
             [
                 'form_params' => [
@@ -17,5 +17,9 @@ trait Helpers
                 ]
             ]
         );
+
+        Cache::put($table, $data[count($data) - 1]->$cacheColumn);
+
+        return $response;
     }
 }
