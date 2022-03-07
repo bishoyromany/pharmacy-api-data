@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\DB;
 class HomeController extends Controller
 {
     public function index(){
-        $users = DB::select("SELECT TOP 10 * FROM PATINS");
-        dd($users);
+       dd(\Artisan::call('pharmacy:sync'));
     }
 }

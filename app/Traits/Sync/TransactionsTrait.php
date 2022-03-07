@@ -25,7 +25,9 @@ trait TransactionsTrait
             if($latestRecord){
                 $query = $query->where($column, '>', $latestRecord);
             }
-            $data = $query->limit($perpage)->offset($perpage * $page)->get();
+            $data = $query->limit($perpage)->offset($perpage * $page)->get()->map(function($item){
+                return json_decode($item->data);
+            });
             $response = HelpersTrait::sendData($cacheKey, $data->toArray(), $column);
             $page += 1;
         }
