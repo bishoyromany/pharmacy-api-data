@@ -15,7 +15,7 @@ trait TransactionsTrait
         $cacheKey = "transactions";
         $column = "TransDate";
         $page = 1;
-        $perpage = 5;
+        $perpage = 10000;
         $total = app(DynamicPOSSTable::class)->setTable("POSTransaction")->count();
         $latestRecord = Cache::get($cacheKey) ?? null;
 
