@@ -2,9 +2,12 @@
 
 namespace App\Traits\Sync;
 
-use App\Models\Transaction;
+use App\Models\DynamicPOSSTable;
 use Illuminate\Support\Facades\Cache;
 use App\Traits\Sync\HelpersTrait;
+use App\Http\Controllers\POS\TransactionController;
+use Illuminate\Http\Request;
+
 trait TransactionsTrait
 {
     public function  transactions()
@@ -12,8 +15,8 @@ trait TransactionsTrait
         $cacheKey = "transactions";
         $column = "TransDate";
         $page = 1;
-        $perpage = 100;
-        $total = Transaction::count();
+        $perpage = 5;
+        $total = app(DynamicPOSSTable::class)->setTable("POSTransaction")->count();
         $latestRecord = Cache::get($cacheKey) ?? null;
 
         if ($this->all) {
@@ -21,14 +24,21 @@ trait TransactionsTrait
         }
 
         while ($page * $perpage <= $total + $perpage) {
-            $query = new Transaction;
+            $request = new Request;
+            $request->merge([
+                'perpage' => $perpage,
+                'page' => $page,
+                'json' => false
+            ]);
             if($latestRecord){
-                $query = $query->where($column, '>', $latestRecord);
+                $request->merge([
+                    'value' => $latestRecord,
+                    'where' => 'POSTransaction.TransDate',
+                    'operator' => '>='
+                ]);
             }
-            $data = $query->limit($perpage)->offset($perpage * $page)->get()->map(function($item){
-                return json_decode($item->data);
-            });
-            $response = HelpersTrait::sendData($cacheKey, $data->toArray(), $column);
+            $data = (new TransactionController)->index($request);
+            $response = HelpersTrait::sendData($cacheKey, $data['data']->toArray(), $column);
             $page += 1;
         }
     }

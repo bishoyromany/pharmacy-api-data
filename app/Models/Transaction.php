@@ -9,5 +9,5 @@ class Transaction extends Model
 {
     use HasFactory;
 
-    protected $table = "transactions";
+    protected $table = "POSTransaction";
 }

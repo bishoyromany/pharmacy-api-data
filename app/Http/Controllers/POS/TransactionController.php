@@ -34,6 +34,9 @@ class TransactionController extends Controller
         });
         // $this->table = $this->table->join($this->tables['paymentDetails'], $this->tables['trasnactions'].'.TransID', '=', $this->tables['paymentDetails'].'.TransID');
         // $this->table = $this->table->join($this->tables['paymentTypes'], $this->tables['paymentDetails'].'.TransTypeCode', '=', $this->tables['paymentTypes'].'.PayTypeID');
+        if(isset($request->json) && $request->json === false){
+            return $data;
+        }
         return $this->api($data);
     }
 }
