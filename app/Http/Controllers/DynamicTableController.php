@@ -16,6 +16,10 @@ class DynamicTableController extends Controller
 
     public function index(String $table, Request $request){
         $this->table->setTable($table);
-        return $this->api($this->pagination($request));
+        $data = $this->pagination($request);
+        if(isset($request->json) && $request->json === false){
+            return $data;
+        }
+        return $this->api($data);
     }
 }

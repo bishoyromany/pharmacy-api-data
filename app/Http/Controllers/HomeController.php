@@ -15,10 +15,10 @@ class HomeController extends Controller
     }
 
     public function cache(){
-        $caches = ["transactions"];
+        $caches = ["transactions", "patients", "rxPay", "rx", "rxVaccine", "activeDrugs"];
         $result = [];
         foreach($caches as $cache){
-            $result = [
+            $result[] = [
                 'key' => $cache,
                 'value' => cache()->get($cache)
             ];

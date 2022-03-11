@@ -2,69 +2,53 @@
 
 namespace App\Traits\Sync;
 
-use GuzzleHttp\Client;
-use App\Models\Pharmacy;
-use App\Models\Patient;
+use App\Models\DynamicTable;
+use Illuminate\Support\Facades\Cache;
+use App\Traits\Sync\HelpersTrait;
+use App\Http\Controllers\DynamicTableController;
+use Illuminate\Http\Request;
 
 trait PatientsSyncTrait
 {
-    public function patients(Pharmacy $pharmacy)
+    public function patients()
     {
-        $client = new Client;
+        $cacheKey = "patients";
+        $column = "LASTMODIFIED";
+        $table = "PATIENT";
         $page = 1;
-        $perpage = 10000;
-        $total = 20000;
-        $latestRecord = Patient::where('pharmacy_id', $pharmacy->id)->orderBy('updated_at', 'desc')->select('updated_at')->first()->updated_at ?? null;
-
+        $perpage = 1000;
+        $total = app(DynamicTable::class)->setTable($table)->count();
+        $latestRecord = Cache::get($cacheKey) ?? null;
+        $dataRes = ['count' => 0, 'res' => []];
         if ($this->all) {
             $latestRecord = null;
         }
 
         while ($page * $perpage <= $total + $perpage) {
-            $query = [
+            $request = new Request;
+            $request->merge([
                 'perpage' => $perpage,
                 'page' => $page,
-                'password' => $pharmacy->config->api_password
-            ];
-
-            if ($latestRecord) {
-                $query['value'] = $latestRecord->format('Y-m-d');
-                $query['where'] = 'LASTMODIFIED';
-                $query['operator'] = ">=";
-            }
-
-            $response = $client->get($pharmacy->config->api . "/PATIENT", [
-                'query' => $query
+                'json' => false
             ]);
-
-            $data = json_decode($response->getBody()->getcontents());
-            $pagination = $data->pagination;
-            $data = $data->data;
-
-            $page = $pagination->nextPage;
-            $perpage = $pagination->perpage;
-            $total = $pagination->total;
-
-            collect($data)->map(function ($item) use ($pharmacy) {
-                $storeData = [];
-                foreach ($this->patientsColumns as $column) {
-                    $storeData[$column] = $item->{$column};
-                }
-                $storeData['pharmacy_id'] = $pharmacy->id;
-                $storeData['user_id'] = $pharmacy->user_id;
-                $storeData['date'] = $storeData['DOB'] ?? "NOT_FOUND";
-                $storeData['phoneNumber'] = $storeData['PHONE'];
-                $storeData['name'] = $storeData['FNAME'] . " " . $storeData['LNAME'];
-                $storeData['data'] = json_encode($item);
-                $storeData['hash'] = md5(json_encode($storeData));
-                $storeData['updated_at'] = $storeData['LASTMODIFIED'];
-                $storeData['created_at'] = $storeData['CREATIONDATE'];
-
-                Patient::updateOrCreate(
-                    ['PATIENTNO' => $storeData['PATIENTNO'], 'pharmacy_id' => $pharmacy->id],
-                    $storeData
-                );
-            });
+            if($latestRecord){
+                $request->merge([
+                    'value' => $latestRecord,
+                    'where' => $column,
+                    'operator' => '>=',
+                    'order' => 'ASC',
+                    'orderBy' => $column
+                ]);
+            }
+            $data = (new DynamicTableController)->index($table, $request);
+            $total = $data['pagination']['total'];
+            $response = HelpersTrait::sendData($cacheKey, $data['data']->toArray(), $column);
+            return $response;
+            $page += 1;
+            $dataRes['count'] += count($data['data']);
+            $dataRes['res'][] = $response;
         }
+
+        return $dataRes;
     }
 }
