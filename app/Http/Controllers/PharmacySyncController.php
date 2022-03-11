@@ -54,10 +54,10 @@ class PharmacySyncController extends Controller
         foreach($tablesInfo as $table){
             $response[$table['cacheKey']] = $this->dataSync($table['cacheKey'], $table['column'], $table['table']);
         }
+        $response['activeDrugs'] = $this->activeDrugs();
         if($this->test){
             dd($response);
         }
-        $this->activeDrugs();
         return response()->json([
             "success" => true,
             "result" => $response

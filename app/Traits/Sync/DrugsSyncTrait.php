@@ -2,70 +2,27 @@
 
 namespace App\Traits\Sync;
 
-use GuzzleHttp\Client;
-use App\Models\Pharmacy;
-use App\Models\Drug;
-use App\Models\ActiveDrugs;
 use App\Models\RX;
+use App\Models\DynamicTable;
+use Illuminate\Support\Facades\Cache;
+use App\Traits\Sync\HelpersTrait;
+use App\Http\Controllers\DynamicTableController;
+use Illuminate\Http\Request;
 
 trait DrugsSyncTrait
 {
-    public function drugs(Pharmacy $pharmacy)
+    public function activeDrugs()
     {
-        $client = new Client;
+        $dataRes = ['count' => 0, 'res' => []];
+        $cacheKey = "activeDrugs";
+        $column = "DRGNDC";
+        $table = "DRUG";
         $page = 1;
-        $perpage = 10000;
-        $total = $page * 20000;
-
-        while ($page * $perpage <= $total + $perpage) {
-            $response = $client->get($pharmacy->config->api . "/DRUG", [
-                'query' => [
-                    'perpage' => $perpage,
-                    'page' => $page,
-                    'password' => $pharmacy->config->api_password,
-                    // 'where' => 'DRGNDC',
-                    // 'value' => '80777027399'
-                ]
-            ]);
-
-            $data = json_decode($response->getBody()->getcontents());
-            $pagination = $data->pagination;
-            $data = $data->data;
-
-            $page = $pagination->nextPage;
-            $perpage = $pagination->perpage;
-            $total = $pagination->total;
-
-            collect($data)->map(function ($item) use ($pharmacy) {
-                $storeData = [];
-                foreach ($this->drugsColumns as $column) {
-                    $storeData[$column] = $item->{$column};
-                }
-                $storeData['pharmacy_id'] = $pharmacy->id;
-                $storeData['user_id'] = $pharmacy->user_id;
-                $storeData['data'] = $item;
-                if (isset($storeData['CREATIONDATE'])) {
-                    $storeData['created_at'] = $storeData['CREATIONDATE'];
-                    $storeData['updated_at'] = $storeData['CREATIONDATE'];
-                }
-
-                Drug::updateOrCreate(
-                    ['DRGNDC' => $storeData['DRGNDC'], 'pharmacy_id' => $pharmacy->id],
-                    $storeData
-                );
-            });
-        }
-    }
-
-    public function activeDrugs(Pharmacy $pharmacy)
-    {
-        $client = new Client;
-        $page = 1;
-        $perpage = 200;
+        $perpage = 1000;
         $ndcs = [[]];
         $index = 0;
-        RX::where('pharmacy_id', '=', $pharmacy->id)
-            ->select('NDC')->distinct('NDC')->get()->map(function ($item) use (&$ndcs, &$index, $perpage) {
+
+        RX::select('NDC')->distinct('NDC')->get()->map(function ($item) use (&$ndcs, &$index, $perpage) {
                 if (count($ndcs[$index]) < $perpage) {
                     $ndcs[$index][] = $item->NDC;
                 } else {
@@ -75,43 +32,23 @@ trait DrugsSyncTrait
             });
 
         foreach ($ndcs as $ndc) {
-            $response = $client->get($pharmacy->config->api . "/DRUG", [
-                'query' => [
-                    'perpage' => $perpage,
-                    'page' => $page,
-                    'password' => $pharmacy->config->api_password,
-                    'where' => 'DRGNDC',
-                    'operator' => 'in',
-                    'value' => implode(',', $ndc)
-                ]
+            $request = new Request;
+            $request->merge([
+                'perpage' => $perpage,
+                'page' => $page,
+                'json' => false,
+                'where' => 'DRGNDC',
+                'operator' => 'in',
+                'value' => implode(',', $ndc)
             ]);
-
-            $data = json_decode($response->getBody()->getcontents());
-            $data = $data->data;
-
-            foreach ($data as $item) {
-                $item = (array)$item;
-                $storeData = [];
-                foreach ($this->activeDrugsColumns as $column) {
-                    $storeData[$column] = $item[$column];
-                }
-                $storeData['pharmacy_id'] = $pharmacy->id;
-                $storeData['user_id'] = $pharmacy->user_id;
-                $storeData['NDC'] = $item['DRGNDC'];
-                $storeData['pack'] = $item['QNTPACK'];
-                $storeData['stock'] = $item['QNTHAND'];
-                $storeData['type'] = $item['DRGTYPE'];
-                $storeData['form'] = $item['FORM'];
-                $storeData['data'] = $item;
-                if (isset($storeData['CREATIONDATE'])) {
-                    $storeData['created_at'] = $storeData['CREATIONDATE'];
-                    $storeData['updated_at'] = $storeData['LDISP'] ?? $storeData['CREATIONDATE'];
-                }
-                activeDrugs::updateOrCreate(
-                    ['NDC' => $storeData['NDC'], 'pharmacy_id' => $pharmacy->id],
-                    $storeData
-                );
-            }
+            $data = (new DynamicTableController)->index($table, $request);
+            $total = $data['pagination']['total'];
+            $response = HelpersTrait::sendData($cacheKey, $data['data']->toArray(), $column);
+            $page += 1;
+            $dataRes['count'] += count($data['data']);
+            $dataRes['res'][] = $response;
         }
+
+        return $dataRes;
     }
 }
