@@ -20,12 +20,13 @@ class PharmacySyncController extends Controller
 
     protected $all = false;
 
-    protected $test = true;
+    protected $test = false;
 
     public function index($all = false, $resetRX = false)
     {
         set_time_limit(0);
         ini_set('memory_limit', '1024M');
+        
         $this->all = $all;
         $tablesInfo = [
             [
@@ -50,18 +51,29 @@ class PharmacySyncController extends Controller
             ]
         ];
         $response = [];
-        $response['transactions'] = $this->transactions();
-        foreach($tablesInfo as $table){
-            $response[$table['cacheKey']] = $this->dataSync($table['cacheKey'], $table['column'], $table['table']);
+
+        try{
+            $response['transactions'] = $this->transactions();
+            foreach($tablesInfo as $table){
+                $response[$table['cacheKey']] = $this->dataSync($table['cacheKey'], $table['column'], $table['table']);
+            }
+            $response['activeDrugs'] = $this->activeDrugs();
+        }catch(\Exception $e){
+            \Log::error("Failed Data Sync", ['response' => json_encode($response), 'error' => $e->getMessage()]);
         }
-        $response['activeDrugs'] = $this->activeDrugs();
+
         if($this->test){
             dd($response);
         }
-        return response()->json([
+
+        $res = [
             "success" => true,
             "result" => $response
-        ]);
+        ];
+
+        \Log::info("Success Data Sync", ['response' => json_encode($res)]);
+
+        return response()->json($res);
     }
 
     public function dataSync(string $cacheKey, string $column, string $table){
