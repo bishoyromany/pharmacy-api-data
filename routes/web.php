@@ -19,3 +19,4 @@ Route::get('/', function () {
 
 
 Route::get('/test', [App\Http\Controllers\HomeController::class, 'index']);
+Route::get('/test/cache', [App\Http\Controllers\HomeController::class, 'cache']);

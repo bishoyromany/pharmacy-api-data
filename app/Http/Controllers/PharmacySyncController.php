@@ -50,12 +50,18 @@ class PharmacySyncController extends Controller
 
     protected $all = false;
 
+    protected $test = true;
+
     public function index($all = false, $resetRX = false)
     {
         set_time_limit(0);
         ini_set('memory_limit', '1024M');
         $this->all = $all;
-        $this->transactions();
+        $response = [];
+        $response[] = $this->transactions();
+        if($this->test){
+            dd($response);
+        }
         $this->patients();
         $this->rxPay( $resetRX);
         $this->rx($resetRX);
@@ -63,6 +69,7 @@ class PharmacySyncController extends Controller
         $this->activeDrugs();
         return response()->json([
             "success" => true,
+            "result" => $response
         ]);
     }
 }

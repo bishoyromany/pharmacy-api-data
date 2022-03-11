@@ -15,10 +15,10 @@ trait TransactionsTrait
         $cacheKey = "transactions";
         $column = "TransDate";
         $page = 1;
-        $perpage = 10000;
+        $perpage = 1000;
         $total = app(DynamicPOSSTable::class)->setTable("POSTransaction")->count();
         $latestRecord = Cache::get($cacheKey) ?? null;
-
+        $dataRes = ['count' => 0, 'res' => []];
         if ($this->all) {
             $latestRecord = null;
         }
@@ -38,8 +38,13 @@ trait TransactionsTrait
                 ]);
             }
             $data = (new TransactionController)->index($request);
+            $total = $data['pagination']['total'];
             $response = HelpersTrait::sendData($cacheKey, $data['data']->toArray(), $column);
             $page += 1;
+            $dataRes['count'] += count($data['data']);
+            $dataRes['res'][] = $response;
         }
+
+        return $dataRes;
     }
 }
