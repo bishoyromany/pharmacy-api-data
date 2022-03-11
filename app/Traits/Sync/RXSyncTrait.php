@@ -2,78 +2,53 @@
 
 namespace App\Traits\Sync;
 
-use App\Models\RxVaccine;
-use App\Models\RXPay;
-use GuzzleHttp\Client;
-use App\Models\Pharmacy;
-use App\Models\RX;
-use App\Models\Patient;
+use App\Models\DynamicTable;
+use Illuminate\Support\Facades\Cache;
+use App\Traits\Sync\HelpersTrait;
+use App\Http\Controllers\DynamicTableController;
+use Illuminate\Http\Request;
 
 trait RXSyncTrait
 {
-
     public function rxVaccine(Pharmacy $pharmacy, $resetRX = false)
     {
-        $client = new Client;
+        $cacheKey = "rxVaccine";
+        $column = "VISPresDate";
+        $table = "RxVaccine";
         $page = 1;
-        $perpage = 10000;
-        $total = $page * 20000;
-        if ($resetRX) {
-            RxVaccine::where('pharmacy_id', $pharmacy->id)->delete();
-        }
-        $latestRecord = RxVaccine::where('pharmacy_id', $pharmacy->id)->orderBy('VISPresDate', 'desc')->select('VISPresDate')->first()->VISPresDate ?? null;
-
+        $perpage = 1000;
+        $total = app(DynamicTable::class)->setTable($table)->count();
+        $latestRecord = Cache::get($cacheKey) ?? null;
+        $dataRes = ['count' => 0, 'res' => []];
         if ($this->all) {
             $latestRecord = null;
         }
 
         while ($page * $perpage <= $total + $perpage) {
-            $query = [
+            $request = new Request;
+            $request->merge([
                 'perpage' => $perpage,
                 'page' => $page,
-                'password' => $pharmacy->config->api_password
-            ];
-
-            if ($latestRecord) {
-                $query['value'] = $latestRecord;
-                $query['where'] = 'VISPresDate';
-                $query['operator'] = ">=";
-            }
-
-            $response = $client->get($pharmacy->config->api . "/RxVaccine", [
-                'query' => $query
+                'json' => false
             ]);
-
-            $data = json_decode($response->getBody()->getcontents());
-            $pagination = $data->pagination;
-            $data = $data->data;
-
-            $page = $pagination->nextPage;
-            $perpage = $pagination->perpage;
-            $total = $pagination->total;
-
-            collect($data)->map(function ($item) use ($pharmacy) {
-                $storeData = [];
-                foreach ($this->rxVaccineColumns as $column) {
-                    $storeData[$column] = $item->{$column};
-                }
-                $rx = RX::select('id')->where('RXNO', $storeData['RxNo'])->where('pharmacy_id', $pharmacy->id)->first();
-                $patient = Patient::select('id')->where('PATIENTNO', $storeData['PatientNo'])->where('pharmacy_id', $pharmacy->id)->first();
-                $storeData['pharmacy_id'] = $pharmacy->id;
-                $storeData['user_id'] = $pharmacy->user_id;
-                $storeData['rx_id'] = $rx->id ?? 0;
-                $storeData['patient_id'] = $patient->id ?? 0;
-                $storeData['data'] = json_encode($item);
-                $storeData['hash'] = md5(json_encode($storeData));
-                $storeData['created_at'] = $storeData['VISPresDate'];
-                $storeData['updated_at'] = $storeData['VISPresDate'];
-
-                return RxVaccine::updateOrCreate(
-                    ['RxNo' => $storeData['RxNo'], 'pharmacy_id' => $pharmacy->id, 'RefillNo' => $storeData['RefillNo']],
-                    $storeData
-                );
-            });
+            if($latestRecord){
+                $request->merge([
+                    'value' => $latestRecord,
+                    'where' => $column,
+                    'operator' => '>=',
+                    'order' => 'ASC',
+                    'orderBy' => $column
+                ]);
+            }
+            $data = (new DynamicTableController)->index($table, $request);
+            $total = $data['pagination']['total'];
+            $response = HelpersTrait::sendData($cacheKey, $data['data']->toArray(), $column);
+            $page += 1;
+            $dataRes['count'] += count($data['data']);
+            $dataRes['res'][] = $response;
         }
+
+        return $dataRes;
     }
 
     public function rxPay(Pharmacy $pharmacy, $resetRX = false)
