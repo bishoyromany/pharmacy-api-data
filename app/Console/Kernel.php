@@ -32,8 +32,8 @@ class Kernel extends ConsoleKernel
             $fp = fopen(base_path() . "/cron.log", 'a'); //opens file in append mode  
             fwrite($fp, 'Cron Alive ' . date('Y-m-d H:i:s A') . " \n");
             fclose($fp);
-        })->everyMinute();
-        $schedule->job(new PharmacySync)->everyFiveMinutes()->runInBackground()->withoutOverlapping(60);
+        })->everyMinute()->name("Cron Is Active");
+        $schedule->job(new PharmacySync)->everyMinute()->name("Data Sync");
         // $schedule->command('inspire')->hourly();
     }
 
