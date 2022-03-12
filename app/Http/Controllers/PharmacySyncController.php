@@ -91,7 +91,7 @@ class PharmacySyncController extends Controller
 
     public function dataSync(string $cacheKey, string $column, string $table){
         $page = 1;
-        $perpage = 1000;
+        $perpage = 500;
         $total = app(DynamicTable::class)->setTable($table)->count();
         $latestRecord = Cache::get($cacheKey) ?? null;
         $dataRes = ['count' => 0, 'res' => []];
