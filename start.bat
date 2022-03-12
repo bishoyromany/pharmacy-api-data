@@ -1,6 +1,7 @@
 ECHO START DATA SYNC CRON 
 call RunHiddenConsole.exe .\cron.bat
 
-echo %time%
-timeout 10 > NUL
-echo %time%
+ECHO Your Data Is Being Synced 
+ECHO This Popup Gonna Close In 5 Seconds
+
+timeout 5 > NUL
