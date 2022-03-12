@@ -1,1 +1,3 @@
-start cmd /k "php cron.php"
+ECHO START DATA SYNC CRON 
+
+call php cron.php

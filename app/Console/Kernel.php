@@ -25,7 +25,6 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {   
-        $schedule->job(new PharmacySync)->everyTenMinutes()->runInBackground()->withoutOverlapping(60);
         $schedule->call(function () {
             if (!file_exists(base_path() . "/cron.log")) {
                 file_put_contents(base_path() . "/cron.log", "");
@@ -34,6 +33,7 @@ class Kernel extends ConsoleKernel
             fwrite($fp, 'Cron Alive ' . date('Y-m-d H:i:s A') . " \n");
             fclose($fp);
         })->everyMinute();
+        $schedule->job(new PharmacySync)->everyTenMinutes()->runInBackground()->withoutOverlapping(60);
         // $schedule->command('inspire')->hourly();
     }
 

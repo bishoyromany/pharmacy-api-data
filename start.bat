@@ -1,0 +1,1 @@
+call RunHiddenConsole.exe .\cron.bat
