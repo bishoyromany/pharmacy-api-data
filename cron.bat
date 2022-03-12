@@ -1,3 +1,3 @@
 ECHO START DATA SYNC CRON 
 
-call php cron.php
+call php -f cron.php
