@@ -22,12 +22,25 @@ class PharmacySyncController extends Controller
 
     protected $test = false;
 
+    protected $serverCache = "API_URL";
+
     public function index($all = false, $resetRX = false)
     {
         set_time_limit(0);
         ini_set('memory_limit', '1024M');
-        
+
         $this->all = $all;
+
+        $server = Cache::get($this->serverCache) ?? null;
+
+        /**
+         * Reset Server Data Each 24 hours, or if server changed
+         */
+        if($server !== env($this->serverCache)){
+            $this->all = true;
+            Cache::put($this->serverCache,env($this->serverCache), now()->addHours(24));
+        }
+
         $tablesInfo = [
             [
                 'cacheKey' => 'patients',
