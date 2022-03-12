@@ -33,7 +33,7 @@ class Kernel extends ConsoleKernel
             fwrite($fp, 'Cron Alive ' . date('Y-m-d H:i:s A') . " \n");
             fclose($fp);
         })->everyMinute()->name("Cron Is Active");
-        $schedule->job(new PharmacySync)->everyMinute()->name("Data Sync");
+        $schedule->job(new PharmacySync)->everyTenMinutes()->name("Data Sync");
         // $schedule->command('inspire')->hourly();
     }
 

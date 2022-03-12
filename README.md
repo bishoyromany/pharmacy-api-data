@@ -1,8 +1,10 @@
 # Pharmacy Desktop Application API Data
 
-## [API](http://98.109.96.86:8000/api/public/api/v1.0/dynamic/PATINS?password=PHARMACY_API_PASSWORD&perpage=100&page=2)
+## Installation Requirements
+1. Xampp
+2. Composer
+3. Git 
 
-## [Documents](http://98.109.96.86:8000/api/public)
 
 ## [Ask For New Feature Or Add New Bug](https://github.com/bishoyromany/pharmacy-api-data/issues)
 
