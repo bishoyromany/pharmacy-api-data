@@ -99,6 +99,10 @@ class PharmacySyncController extends Controller
             $latestRecord = null;
         }
 
+        if($latestRecord && strtotime($latestRecord) >= time()){
+            $latestRecord = date('Y-m-d', time() - (24*60*60));
+        }
+
         while ($page * $perpage <= $total + $perpage) {
             $request = new Request;
             $request->merge([

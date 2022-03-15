@@ -26,12 +26,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {   
         $schedule->call(function () {
-            if (!file_exists(base_path() . "/cron.log")) {
-                file_put_contents(base_path() . "/cron.log", "");
-            }
-            $fp = fopen(base_path() . "/cron.log", 'a'); //opens file in append mode  
-            fwrite($fp, 'Cron Alive ' . date('Y-m-d H:i:s A') . " \n");
-            fclose($fp);
+            \Log::info('Cron Alive ' . date('Y-m-d H:i:s A'));
         })->everyMinute()->name("Cron Is Active");
         $schedule->job(new PharmacySync)->everyTenMinutes()->name("Data Sync")->withoutOverlapping();
         // $schedule->command('inspire')->hourly();
