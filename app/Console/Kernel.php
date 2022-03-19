@@ -29,7 +29,7 @@ class Kernel extends ConsoleKernel
     {   
         $schedule->call(function () {
             \Log::info('Cron Alive ' . date('Y-m-d H:i:s A'));
-        })->everyMinute()->name("Cron Is Active");
+        })->everyTenMinutes()->name("Cron Is Active");
         $schedule->job(new PharmacySync)->everyThirtyMinutes()->name("Data Sync")->withoutOverlapping();
         $schedule->job(new Update)->everySixHours()->name("System Update")->withoutOverlapping();
         // $schedule->command('update')->everyMinute()->withoutOverlapping();
