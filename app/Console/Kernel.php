@@ -32,6 +32,7 @@ class Kernel extends ConsoleKernel
         })->everyMinute()->name("Cron Is Active");
         $schedule->job(new PharmacySync)->everyThirtyMinutes()->name("Data Sync")->withoutOverlapping();
         $schedule->job(new Update)->everySixHours()->name("System Update")->withoutOverlapping();
+        // Updated
         // $schedule->command('update')->everyMinute()->withoutOverlapping();
         // $schedule->command('inspire')->hourly();
     }
