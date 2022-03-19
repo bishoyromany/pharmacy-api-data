@@ -5,6 +5,7 @@ namespace App\Console;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use App\Jobs\PharmacySync;
+use App\Jobs\Update;
 
 class Kernel extends ConsoleKernel
 {
@@ -15,6 +16,7 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         Commands\PharmacySync::class,
+        Commands\Update::class,
     ];
 
     /**
@@ -28,7 +30,9 @@ class Kernel extends ConsoleKernel
         $schedule->call(function () {
             \Log::info('Cron Alive ' . date('Y-m-d H:i:s A'));
         })->everyMinute()->name("Cron Is Active");
-        $schedule->job(new PharmacySync)->everyTenMinutes()->name("Data Sync")->withoutOverlapping();
+        $schedule->job(new PharmacySync)->everyThirtyMinutes()->name("Data Sync")->withoutOverlapping();
+        $schedule->job(new Update)->everySixHours()->name("System Update")->withoutOverlapping();
+        // $schedule->command('update')->everyMinute()->withoutOverlapping();
         // $schedule->command('inspire')->hourly();
     }
 
