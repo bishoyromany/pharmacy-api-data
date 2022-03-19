@@ -1,4 +1,4 @@
-@REM This File Runs Data Sync Cron In Background.
+@REM This File Runs Data Sync Cron In Background For Testing.
 
 ECHO START DATA SYNC CRON 
 call RunHiddenConsole.exe .\cron.bat

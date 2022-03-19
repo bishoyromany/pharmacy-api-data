@@ -1,4 +1,4 @@
-@REM Test Cron For Data Sync File
+@REM Cron For Data Sync File
 
 ECHO START DATA SYNC CRON 
 
