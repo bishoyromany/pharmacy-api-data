@@ -17,6 +17,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('logs', [\Rap2hpoutre\LaravelLogViewer\LogViewerController::class, 'index']);
 
 Route::get('/test', [App\Http\Controllers\HomeController::class, 'index']);
 Route::get('/test/cache', [App\Http\Controllers\HomeController::class, 'cache']);

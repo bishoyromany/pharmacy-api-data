@@ -24,11 +24,15 @@ trait HelpersTrait
             if(count($data) > 0){
                 Cache::put($table, $data[count($data) - 1][$cacheColumn], now()->addMinutes(60));
             }
+            \Log::info("Success Data Sync For ".$table, ['cache' => cache()->get($table), 'response' => $response]);
+
         }catch(\GuzzleHttp\Exception\RequestException $e){
             try{
                 $response = $e->getResponse()->getBody()->getContents();
+                \Log::info("Failed Data Sync For ".$table, ['cache' => cache()->get($table), 'response' => $response]);
             }catch(\Exception $e){
                 $response = $e->getMessage();
+                \Log::error("Failed Data Sync For ".$table, ['cache' => cache()->get($table), 'error' => $e->getMessage()]);
             }
         }
 
