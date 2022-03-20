@@ -22,7 +22,7 @@ trait HelpersTrait
             )->getBody()->getContents();
             
             if(count($data) > 0){
-                Cache::put($table, $data[count($data) - 1][$cacheColumn], now()->addMinutes(60));
+                Cache::put($table, $data[count($data) - 1][$cacheColumn], now()->addDay());
             }
             \Log::info("Success Data Sync For ".$table, ['cache' => cache()->get($table), 'response' => $response]);
 
