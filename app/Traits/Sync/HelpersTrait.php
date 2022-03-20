@@ -20,7 +20,7 @@ trait HelpersTrait
                     ]
                 ]
             )->getBody()->getContents();
-            
+        
             if(count($data) > 0){
                 Cache::put($table, $data[count($data) - 1][$cacheColumn], now()->addDay());
             }

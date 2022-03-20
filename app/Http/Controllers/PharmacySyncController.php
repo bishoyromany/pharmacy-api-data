@@ -22,6 +22,8 @@ class PharmacySyncController extends Controller
 
     protected $test = false;
 
+    protected $useMaxDate = false;
+
     protected $serverCache = "API_URL";
 
     public function index($all = false, $resetRX = false)
@@ -30,7 +32,7 @@ class PharmacySyncController extends Controller
         ini_set('memory_limit', '1024M');
 
         $this->all = $all;
-
+        
         $server = Cache::get($this->serverCache) ?? null;
 
         /**
@@ -51,16 +53,19 @@ class PharmacySyncController extends Controller
                 'cacheKey' => 'rxPay',
                 'column' => 'DATEPAID',
                 'table' => 'RxPay',
+                'max_date' => true
             ],
             [
                 'cacheKey' => 'rx',
                 'column' => 'DATEF',
                 'table' => 'RxDetails',
+                'max_date' => true
             ],
             [
                 'cacheKey' => 'rxVaccine',
                 'column' => 'VISPresDate',
                 'table' => 'RxVaccine',
+                'max_date' => true
             ]
         ];
         $response = [];
@@ -68,7 +73,7 @@ class PharmacySyncController extends Controller
         try{
             $response['transactions'] = $this->transactions();
             foreach($tablesInfo as $table){
-                $response[$table['cacheKey']] = $this->dataSync($table['cacheKey'], $table['column'], $table['table']);
+                $response[$table['cacheKey']] = $this->dataSync($table['cacheKey'], $table['column'], $table['table'], $table['max_date'] ?? false);
             }
             $response['activeDrugs'] = $this->activeDrugs();
         }catch(\Exception $e){
@@ -89,9 +94,9 @@ class PharmacySyncController extends Controller
         return response()->json($res);
     }
 
-    public function dataSync(string $cacheKey, string $column, string $table){
+    public function dataSync(string $cacheKey, string $column, string $table, bool $maxDate = false){
         $page = 1;
-        $perpage = 500;
+        $perpage = 3000;
         $total = app(DynamicTable::class)->setTable($table)->count();
         $latestRecord = Cache::get($cacheKey) ?? null;
         $dataRes = ['count' => 0, 'res' => []];
@@ -101,6 +106,23 @@ class PharmacySyncController extends Controller
 
         if($latestRecord && strtotime($latestRecord) >= time()){
             $latestRecord = date('Y-m-d', time() - (24*60*60));
+        }
+
+        if($maxDate && !$this->useMaxDate){
+            if($total > config("sync.max_allowed_data")){
+                $this->useMaxDate = true;
+            }
+        }
+
+        if($this->useMaxDate && $maxDate){
+            if(!$latestRecord || strtotime($latestRecord) < config("sync.sync_timestamp")){
+                $latestRecord = config("sync.sync_date");
+            }
+        }
+
+
+        if($total < $perpage){
+            $total = $perpage * 2;
         }
 
         while ($page * $perpage <= $total + $perpage) {

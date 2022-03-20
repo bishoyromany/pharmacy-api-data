@@ -38,7 +38,7 @@ class PharmacySync extends Command
      */
     public function handle()
     {
-        (new PharmacySyncController)->index($this->option("all"), $this->option("reset-rx"));
+        $this->info((new PharmacySyncController)->index($this->option("all"), $this->option("reset-rx")));
         return Command::SUCCESS;
     }
 }
