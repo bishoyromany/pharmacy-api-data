@@ -37,7 +37,8 @@ class Update extends Command
      */
     public function handle()
     {
-        exec(__DIR__."/../../../update.bat");
+        $data = exec(__DIR__."/../../../update.bat");
+        \Log::info("update", ["response" => $data]);
         return 0;
     }
 }
