@@ -42,9 +42,7 @@ trait DrugsSyncTrait
                 'value' => implode(',', $ndc)
             ]);
             $data = (new DynamicTableController)->index($table, $request);
-            $total = $data['pagination']['total'];
             $response = HelpersTrait::sendData($cacheKey, $data['data']->toArray(), $column);
-            $page += 1;
             $dataRes['count'] += count($data['data']);
             $dataRes['res'][] = $response;
         }
