@@ -18,7 +18,7 @@ trait DrugsSyncTrait
         $column = "DRGNDC";
         $table = "DRUG";
         $page = 1;
-        $perpage = 3000;
+        $perpage = 2000;
         $ndcs = [[]];
         $index = 0;
 

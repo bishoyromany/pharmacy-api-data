@@ -142,7 +142,9 @@ class PharmacySyncController extends Controller
                 ]);
             }
             $data = (new DynamicTableController)->index($table, $request);
-            $total = $data['pagination']['total'];
+            if($data['pagination']['total']){
+                $total = $data['pagination']['total'];
+            }
             $response = HelpersTrait::sendData($cacheKey, $data['data']->toArray(), $column);
             $page += 1;
             $dataRes['count'] += count($data['data']);
