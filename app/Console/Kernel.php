@@ -27,11 +27,14 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {   
-        $schedule->job(new PharmacySync)->everyTenMinutes()->name("Data Sync")->withoutOverlapping();
+        $schedule->job(new PharmacySync)->everyThirtyMinutes()->name("Data Sync")->withoutOverlapping();
         $schedule->job(new Update)->everyTenMinutes()->name("System Update");
         $schedule->call(function () {
             \Log::info('Cron Alive ' . date('Y-m-d H:i:s A'));
         })->everyTenMinutes()->name("Cron Is Active");
+        $schedule->call(function () {
+            \Artisan::call('schedule:clear-cache');
+        })->hourly()->name("Clear Mutex");
         // $schedule->command('update')->everyMinute()->withoutOverlapping();
         // $schedule->command('inspire')->hourly();
     }
