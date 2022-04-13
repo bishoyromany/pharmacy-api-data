@@ -32,7 +32,7 @@ class PharmacySyncController extends Controller
         ini_set('memory_limit', '1024M');
 
         $this->all = $all;
-        
+
         $server = Cache::get($this->serverCache) ?? null;
 
         /**
@@ -70,6 +70,8 @@ class PharmacySyncController extends Controller
         ];
         $response = [];
 
+        HelpersTrait::log("Start Data Sync", true, "Start Data Sync");
+
         try{
             $response['transactions'] = $this->transactions();
             foreach($tablesInfo as $table){
@@ -89,6 +91,8 @@ class PharmacySyncController extends Controller
             "result" => $response
         ];
 
+        HelpersTrait::log("Finished Data Sync", true, json_encode($res));
+
         \Log::info("Success Data Sync", ['response' => json_encode($res)]);
 
         return response()->json($res);
@@ -98,7 +102,8 @@ class PharmacySyncController extends Controller
         $page = 1;
         $perpage = 3000;
         $total = app(DynamicTable::class)->setTable($table)->count();
-        $latestRecord = Cache::get($cacheKey) ?? null;
+        $latestRecord = HelpersTrait::getLatestSyncTime($cacheKey);
+        $latestRecord = $latestRecord ?? Cache::get($cacheKey) ?? null;
         $dataRes = ['count' => 0, 'res' => []];
         if ($this->all) {
             $latestRecord = null;

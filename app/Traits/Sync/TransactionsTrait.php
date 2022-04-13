@@ -20,7 +20,8 @@ trait TransactionsTrait
         if($total < $perpage){
             $total = $perpage * 2;
         }
-        $latestRecord = Cache::get($cacheKey) ?? null;
+        $latestRecord = HelpersTrait::getLatestSyncTime($cacheKey);
+        $latestRecord = $latestRecord ?? Cache::get($cacheKey) ?? null;
         $dataRes = ['count' => 0, 'res' => []];
         $useMaxDate = false;
         if ($this->all) {

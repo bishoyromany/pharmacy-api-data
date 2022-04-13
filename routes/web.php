@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Test\LatestDataSyncController;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,3 +22,4 @@ Route::get('logs', [\Rap2hpoutre\LaravelLogViewer\LogViewerController::class, 'i
 
 Route::get('/test', [App\Http\Controllers\HomeController::class, 'index']);
 Route::get('/test/cache', [App\Http\Controllers\HomeController::class, 'cache']);
+Route::get('/test/latest/data/sync/time', [LatestDataSyncController::class, 'getLatestTime']);

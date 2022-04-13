@@ -9,7 +9,6 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Artisan;
-
 class Update implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
@@ -31,6 +30,8 @@ class Update implements ShouldQueue
      */
     public function handle()
     {
-        return Artisan::call("update");
+        $result = Artisan::call("update");
+
+        return $result;
     }
 }

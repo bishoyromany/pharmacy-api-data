@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-
+use App\Traits\Sync\HelpersTrait;
 class Update extends Command
 {
     /**
@@ -38,7 +38,7 @@ class Update extends Command
     public function handle()
     {
         $data = exec(__DIR__."/../../../update.bat");
-        \Log::info("update", ["response" => $data]);
+        HelpersTrait::log("System Update", true, $data);
         return 0;
     }
 }
