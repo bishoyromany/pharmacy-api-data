@@ -105,8 +105,6 @@ class PharmacySyncController extends Controller
 
         HelpersTrait::log("Finished Data Sync", true, json_encode($res));
 
-        \Log::info("Success Data Sync", ['response' => json_encode($res)]);
-
         return response()->json($res);
     }
 
