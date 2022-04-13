@@ -73,13 +73,25 @@ class PharmacySyncController extends Controller
         HelpersTrait::log("Start Data Sync", true, "Start Data Sync");
 
         try{
-            $response['transactions'] = $this->transactions();
-            foreach($tablesInfo as $table){
-                $response[$table['cacheKey']] = $this->dataSync($table['cacheKey'], $table['column'], $table['table'], $table['max_date'] ?? false);
+            try{
+                $response['transactions'] = $this->transactions();
+            }catch(\Exception $e){
+                HelpersTrait::log("Finished Data Sync Error Transactions", false, json_encode(['response' => $response, 'error' => $e->getMessage()]));
             }
-            $response['activeDrugs'] = $this->activeDrugs();
+            foreach($tablesInfo as $table){
+                try{
+                    $response[$table['cacheKey']] = $this->dataSync($table['cacheKey'], $table['column'], $table['table'], $table['max_date'] ?? false);
+                }catch(\Exception $e){
+                    HelpersTrait::log("Finished Data Sync Error ".$table['cacheKey'], false, json_encode(['response' => $response, 'error' => $e->getMessage()]));
+                }
+            }
+            try{
+                $response['activeDrugs'] = $this->activeDrugs();
+            }catch(\Exception $e){
+                HelpersTrait::log("Finished Data Sync Error activeDrugs", false, json_encode(['response' => $response, 'error' => $e->getMessage()]));
+            }
         }catch(\Exception $e){
-            \Log::error("Failed Data Sync", ['response' => json_encode($response), 'error' => $e->getMessage()]);
+            HelpersTrait::log("Finished Data Sync Error", false, json_encode(['response' => $response, 'error' => $e->getMessage()]));
         }
 
         if($this->test){
@@ -92,8 +104,6 @@ class PharmacySyncController extends Controller
         ];
 
         HelpersTrait::log("Finished Data Sync", true, json_encode($res));
-
-        \Log::info("Success Data Sync", ['response' => json_encode($res)]);
 
         return response()->json($res);
     }
