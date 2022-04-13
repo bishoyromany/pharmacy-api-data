@@ -32,7 +32,7 @@ class PharmacySyncController extends Controller
         ini_set('memory_limit', '1024M');
 
         $this->all = $all;
-        
+
         $server = Cache::get($this->serverCache) ?? null;
 
         /**
@@ -98,7 +98,8 @@ class PharmacySyncController extends Controller
         $page = 1;
         $perpage = 3000;
         $total = app(DynamicTable::class)->setTable($table)->count();
-        $latestRecord = Cache::get($cacheKey) ?? null;
+        $latestRecord = HelpersTrait::getLatestSyncTime($cacheKey);
+        $latestRecord = $latestRecord ?? Cache::get($cacheKey) ?? null;
         $dataRes = ['count' => 0, 'res' => []];
         if ($this->all) {
             $latestRecord = null;
