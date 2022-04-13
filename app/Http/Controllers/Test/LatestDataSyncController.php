@@ -11,7 +11,11 @@ class LatestDataSyncController extends Controller
     use HelpersTrait;
 
     public function getLatestTime(Request $request){
-        dd($this->getLatestSyncTime("rx"));
-        dd($request->all());
+        $tables = ["transactions", "patients", "rxPay", "rx", "rxVaccine"];
+        $data = [];
+        foreach($tables as $table){
+            $data[$table] = $this->getLatestSyncTime($table);
+        }
+        dd($data);
     }
 }
