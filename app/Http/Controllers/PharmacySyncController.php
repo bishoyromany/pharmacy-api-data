@@ -70,6 +70,8 @@ class PharmacySyncController extends Controller
         ];
         $response = [];
 
+        HelpersTrait::log("Start Data Sync", true, "Start Data Sync");
+
         try{
             $response['transactions'] = $this->transactions();
             foreach($tablesInfo as $table){
@@ -88,6 +90,8 @@ class PharmacySyncController extends Controller
             "success" => true,
             "result" => $response
         ];
+
+        HelpersTrait::log("Finished Data Sync", true, json_encode($res));
 
         \Log::info("Success Data Sync", ['response' => json_encode($res)]);
 
