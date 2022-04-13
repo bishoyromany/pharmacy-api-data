@@ -9,9 +9,6 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Artisan;
-use App\Traits\Sync\HelpersTrait;
-
-
 class Update implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
@@ -34,8 +31,6 @@ class Update implements ShouldQueue
     public function handle()
     {
         $result = Artisan::call("update");
-
-        HelpersTrait::log("System Update", true, $result);
 
         return $result;
     }
