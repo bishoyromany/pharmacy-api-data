@@ -24,7 +24,12 @@ class PharmacySyncController extends Controller
 
     protected $useMaxDate = false;
 
+    protected $date = false;
+
     protected $serverCache = "API_URL";
+    protected $dwonDayCache = "DOWN_DAY_CACHE";
+
+    protected $downDay = "2022-04-06";
 
     public function index($all = false, $resetRX = false)
     {
@@ -35,12 +40,22 @@ class PharmacySyncController extends Controller
 
         $server = Cache::get($this->serverCache) ?? null;
 
+        $downDay = Cache::get($this->dwonDayCache) ?? null;
+
         /**
          * Reset Server Data Each 24 hours, or if server changed
          */
         if($server !== env($this->serverCache)){
             $this->all = true;
             Cache::put($this->serverCache,env($this->serverCache), now()->addHours(24));
+        }
+
+        /**
+         * Use Specific Date
+         */
+        if($this->downDay && $downDay !== $this->downDay){
+            $this->date = $this->downDay;
+            Cache::put($this->dwonDayCache,$this->downDay, now()->addHours(24 * 80));
         }
 
         $tablesInfo = [
@@ -115,6 +130,11 @@ class PharmacySyncController extends Controller
         $latestRecord = HelpersTrait::getLatestSyncTime($cacheKey);
         $latestRecord = $latestRecord ?? Cache::get($cacheKey) ?? null;
         $dataRes = ['count' => 0, 'res' => []];
+
+        if($this->date){
+            $latestRecord = $this->date;
+        }
+
         if ($this->all) {
             $latestRecord = null;
         }
