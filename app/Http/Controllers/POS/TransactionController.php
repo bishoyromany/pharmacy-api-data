@@ -28,8 +28,10 @@ class TransactionController extends Controller
         $data['data']->map(function($item){
             $paymentDetails = app(DynamicPOSSTable::class)->setTable($this->tables['paymentDetails'])->where('TransID', $item->TransID)->first();
             // $item->paymentDetails = $paymentDetails;
-            $paymentTypes = app(DynamicPOSSTable::class)->setTable($this->tables['paymentTypes'])->where('PayTypeID', $paymentDetails->TransTypeCode)->first();
-            $item->paymentTypes = $paymentTypes;
+            if(isset($paymentDetails->TransTypeCode)){
+                $paymentTypes = app(DynamicPOSSTable::class)->setTable($this->tables['paymentTypes'])->where('PayTypeID', $paymentDetails->TransTypeCode)->first();
+                $item->paymentTypes = $paymentTypes;
+            }
             return $item;
         });
         // $this->table = $this->table->join($this->tables['paymentDetails'], $this->tables['trasnactions'].'.TransID', '=', $this->tables['paymentDetails'].'.TransID');
