@@ -24,6 +24,11 @@ trait TransactionsTrait
         $latestRecord = $latestRecord ?? Cache::get($cacheKey) ?? null;
         $dataRes = ['count' => 0, 'res' => []];
         $useMaxDate = false;
+
+        if($this->date){
+            $latestRecord = $this->date;
+        }
+
         if ($this->all) {
             $latestRecord = null;
         }
