@@ -6,6 +6,7 @@ use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use App\Jobs\PharmacySync;
 use App\Jobs\Update;
+use App\Jobs\PrefillRXSync;
 
 class Kernel extends ConsoleKernel
 {
@@ -17,6 +18,7 @@ class Kernel extends ConsoleKernel
     protected $commands = [
         Commands\PharmacySync::class,
         Commands\Update::class,
+        Commands\PrefillRXSync::class,
     ];
 
     /**
@@ -26,9 +28,10 @@ class Kernel extends ConsoleKernel
      * @return void
      */
     protected function schedule(Schedule $schedule)
-    {   
+    {
         $schedule->job(new PharmacySync)->everyThirtyMinutes()->name("Data Sync")->withoutOverlapping();
         $schedule->job(new Update)->everyTenMinutes()->name("System Update");
+        $schedule->job(new PrefillRXSync)->daily()->name("Prefill RX Sync");
         $schedule->call(function () {
             \Log::info('Cron Alive ' . date('Y-m-d H:i:s A'));
         })->everyTenMinutes()->name("Cron Is Active");
@@ -46,7 +49,7 @@ class Kernel extends ConsoleKernel
      */
     protected function commands()
     {
-        $this->load(__DIR__.'/Commands');
+        $this->load(__DIR__ . '/Commands');
 
         require base_path('routes/console.php');
     }

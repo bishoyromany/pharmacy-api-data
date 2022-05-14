@@ -5,7 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Http\Controllers\SyncPrefillRXController;
 
-class RXSyncPrefill extends Command
+class PrefillRXSync extends Command
 {
     /**
      * The name and signature of the console command.
