@@ -47,17 +47,16 @@ trait HelpersTrait
     {
         $client = new \GuzzleHttp\Client();
         try {
+            $params['pharmacy'] = env("PHARMACY_USERNAME");
+            $params['password'] = env("API_PASSWORD");
+
             $response = $client->get(
                 env("API_URL") . $url,
                 [
-                    'params' => [
-                        'pharmacy' => env("PHARMACY_USERNAME"),
-                        'password' => env("API_PASSWORD"),
-                        'params' => $params
-                    ]
+                    'query' => $params
                 ]
             )->getBody()->getContents();
-            dd($response);
+            $response = json_decode($response, true);
         } catch (\GuzzleHttp\Exception\RequestException $e) {
             try {
                 $response = $e->getResponse()->getBody()->getContents();
