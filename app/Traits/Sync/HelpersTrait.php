@@ -43,7 +43,7 @@ trait HelpersTrait
     /**
      * Send Get Request
      */
-    public static function sendGetRequest(string $url, array $params = [],)
+    public static function sendGetRequest(string $url, array $params = [])
     {
         $client = new \GuzzleHttp\Client();
         try {
@@ -57,8 +57,15 @@ trait HelpersTrait
                     ]
                 ]
             )->getBody()->getContents();
+            dd($response);
         } catch (\GuzzleHttp\Exception\RequestException $e) {
-            dd($e);
+            try {
+                $response = $e->getResponse()->getBody()->getContents();
+                \Log::info("Failed Get Request To " . $url, ['response' => $response]);
+            } catch (\Exception $e) {
+                $response = $e->getMessage();
+                \Log::error("Failed Get Request To " . $url, ['error' => $e->getMessage()]);
+            }
         }
 
         return $response;
