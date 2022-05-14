@@ -32,10 +32,11 @@ class SyncPrefillRXController extends Controller
             } catch (\Exception $e) {
                 $page = null;
                 HelpersTrait::log("Finished Prefill RX Data Sync Error", false, json_encode(['response' => $result, 'error' => $e->getMessage()]));
+                return json_encode($result);
             }
         }
 
-        HelpersTrait::log("Finished Prefill RX Data Sync", false, json_encode(['response' => $result]));
+        HelpersTrait::log("Finished Prefill RX Data Sync", true, json_encode(['response' => $result]));
 
         return json_encode($result);
     }
