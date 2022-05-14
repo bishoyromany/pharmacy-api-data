@@ -1,14 +1,16 @@
 <?php
 
 namespace App\Traits\Sync;
+
 use Illuminate\Support\Facades\Cache;
 use Guzzle\Http\Exception\ClientErrorResponseException;
 
 trait HelpersTrait
 {
-    public static function sendData(string $table, array $data, string $cacheColumn){
+    public static function sendData(string $table, array $data, string $cacheColumn)
+    {
         $client = new \GuzzleHttp\Client();
-        try{
+        try {
             $response = $client->post(
                 env("API_URL") . "/pharmacy/sync/data",
                 [
@@ -21,32 +23,56 @@ trait HelpersTrait
                 ]
             )->getBody()->getContents();
 
-            if(count($data) > 0){
+            if (count($data) > 0) {
                 Cache::put($table, $data[count($data) - 1][$cacheColumn], now()->addDay());
             }
-            \Log::info("Success Data Sync For ".$table, ['cache' => cache()->get($table), 'response' => $response]);
-
-        }catch(\GuzzleHttp\Exception\RequestException $e){
-            try{
+            \Log::info("Success Data Sync For " . $table, ['cache' => cache()->get($table), 'response' => $response]);
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
+            try {
                 $response = $e->getResponse()->getBody()->getContents();
-                \Log::info("Failed Data Sync For ".$table, ['cache' => cache()->get($table), 'response' => $response]);
-            }catch(\Exception $e){
+                \Log::info("Failed Data Sync For " . $table, ['cache' => cache()->get($table), 'response' => $response]);
+            } catch (\Exception $e) {
                 $response = $e->getMessage();
-                \Log::error("Failed Data Sync For ".$table, ['cache' => cache()->get($table), 'error' => $e->getMessage()]);
+                \Log::error("Failed Data Sync For " . $table, ['cache' => cache()->get($table), 'error' => $e->getMessage()]);
             }
         }
 
         return $response;
     }
 
-    public static function log(string $message, bool $status, string $description){
+    /**
+     * Send Get Request
+     */
+    public static function sendGetRequest(string $url, array $params = [],)
+    {
         $client = new \GuzzleHttp\Client();
-        if($status){
+        try {
+            $response = $client->get(
+                env("API_URL") . $url,
+                [
+                    'params' => [
+                        'pharmacy' => env("PHARMACY_USERNAME"),
+                        'password' => env("API_PASSWORD"),
+                        'params' => $params
+                    ]
+                ]
+            )->getBody()->getContents();
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
+            dd($e);
+        }
+
+        return $response;
+    }
+
+    public static function log(string $message, bool $status, string $description)
+    {
+        $client = new \GuzzleHttp\Client();
+        if ($status) {
             \Log::info($message, ['description' => $description]);
-        }else{
+        } else {
             \Log::error($message, ['description' => $description]);
         }
-        try{
+        try {
             $response = $client->post(
                 env("API_URL") . "/pharmacy/sync/data/log",
                 [
@@ -59,25 +85,26 @@ trait HelpersTrait
                     ]
                 ]
             )->getBody()->getContents();
-        }catch(\GuzzleHttp\Exception\RequestException $e){
-            try{
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
+            try {
                 $response = $e->getResponse()->getBody()->getContents();
                 \Log::info("Failed To Add Cache", ['response' => $response]);
-            }catch(\Exception $e){
+            } catch (\Exception $e) {
                 $response = $e->getMessage();
-                \Log::error("Failed To Add Cache" , ['error' => $e->getMessage()]);
+                \Log::error("Failed To Add Cache", ['error' => $e->getMessage()]);
             }
         }
 
         return $response;
     }
 
-    public static function getLatestSyncTime(string $table){
+    public static function getLatestSyncTime(string $table)
+    {
         $client = new \GuzzleHttp\Client();
-        try{
+        try {
             $response = $client->get(
                 env("API_URL") . "/pharmacy/sync/data/last/record",
-        [
+                [
                     'query' => [
                         'table' => $table,
                         'pharmacy' => env("PHARMACY_USERNAME"),
@@ -85,17 +112,17 @@ trait HelpersTrait
                     ]
                 ]
             )->getBody()->getContents();
-            self::log("Success Get Latest Sync Time For ".$table, true, $response);
+            self::log("Success Get Latest Sync Time For " . $table, true, $response);
 
             $response = json_decode($response);
             return $response->data->date ?? null;
-        }catch(\GuzzleHttp\Exception\RequestException $e){
-            try{
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
+            try {
                 $response = $e->getResponse()->getBody()->getContents();
-                self::log("Failed Get Latest Sync Time For ".$table, false, $response);
-            }catch(\Exception $e){
+                self::log("Failed Get Latest Sync Time For " . $table, false, $response);
+            } catch (\Exception $e) {
                 $response = $e->getMessage();
-                self::log("Failed Get Latest Sync Time For ".$table, false, $e->getMessage());
+                self::log("Failed Get Latest Sync Time For " . $table, false, $e->getMessage());
             }
         }
 
