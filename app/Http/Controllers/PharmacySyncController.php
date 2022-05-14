@@ -29,7 +29,7 @@ class PharmacySyncController extends Controller
     protected $serverCache = "API_URL";
     protected $dwonDayCache = "DOWN_DAY_CACHE";
 
-    protected $downDay = "2022-04-06";
+    protected $downDay = "2022-04-27";
 
     public function index($all = false, $resetRX = false)
     {
