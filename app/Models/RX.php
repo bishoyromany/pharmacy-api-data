@@ -10,6 +10,7 @@ class RX extends Model
     use HasFactory;
 
     protected $table = "RxDetails";
+    public $timestamps = false;
 
     protected $fillable = [
         "PATIENTNO", "PATTYPE", "BILLINS", "BILLTYPE", "RXNO", "STATUS", "PAYSTATUS", "PRESNO", "NDC", "BRAND", "PRIORAPP", "DATEO", "DATEF", "QUANT", "DAYS", "TREFILLS",
@@ -23,6 +24,4 @@ class RX extends Model
         "PatTypeInsName", "ADDRESS", "CITY", "STATE", "ZIP", "PHONE_V", "PHARM_NO", "MAG_CODE", "MDREFILL", "RxEnteredBy", "NCPDPQuantityUnitOfMeasure", "PresFaxNo", "PresNpiNo",
         "InvBucketID"
     ];
-
-    protected $guards = ["updated_at", "created_at"];
 }
