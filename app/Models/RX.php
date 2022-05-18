@@ -23,4 +23,6 @@ class RX extends Model
         "PatTypeInsName", "ADDRESS", "CITY", "STATE", "ZIP", "PHONE_V", "PHARM_NO", "MAG_CODE", "MDREFILL", "RxEnteredBy", "NCPDPQuantityUnitOfMeasure", "PresFaxNo", "PresNpiNo",
         "InvBucketID"
     ];
+
+    protected $guards = ["updated_at", "created_at"];
 }
