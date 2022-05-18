@@ -10,4 +10,6 @@ class RX extends Model
     use HasFactory;
 
     protected $table = "RxDetails";
+
+    protected $guarded = [];
 }
