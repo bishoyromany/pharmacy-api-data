@@ -21,15 +21,7 @@ class SyncPrefillRXController extends Controller
                 $page = $data['pagination']['nextPage'] ?? null;
                 foreach ($data['data'] as $rx) {
                     $rxData = $rx['data'];
-                    if (isset($rxData['row_num'])) {
-                        unset($rxData['row_num']);
-                    }
-                    if (isset($rxData['updated_at'])) {
-                        unset($rxData['updated_at']);
-                    }
-                    if (isset($rxData['created_at'])) {
-                        unset($rxData['created_at']);
-                    }
+
                     $exists = RX::where('RXNO', '=', $rxData['RXNO'])->where('NREFILL', '=', $rxData['NREFILL'])->first();
                     if (!$exists) {
                         RX::create($rxData);
